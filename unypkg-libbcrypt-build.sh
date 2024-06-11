@@ -35,13 +35,13 @@ mkdir -pv /uny/sources
 cd /uny/sources || exit
 
 pkgname="libbcrypt"
-pkggit="https://github.com/libbcrypt/libbcrypt.git refs/tags/*"
+pkggit="https://github.com/litespeedtech/libbcrypt.git refs/heads/master"
 gitdepth="--depth=1"
 
 ### Get version info from git remote
 # shellcheck disable=SC2086
-latest_head="$(git ls-remote --refs --tags --sort="v:refname" $pkggit | grep -E "v[0-9.]+$" | tail --lines=1)"
-latest_ver="$(echo "$latest_head" | grep -o "v[0-9.].*" | sed "s|v||")"
+latest_head="$(git ls-remote --refs --sort="v:refname" $pkggit)"
+latest_ver="${latest_head:0:8}"
 latest_commit_id="$(echo "$latest_head" | cut --fields=1)"
 
 version_details
@@ -77,12 +77,12 @@ get_include_paths
 
 unset LD_RUN_PATH
 
-./configure \
-    --prefix=/uny/pkg/"$pkgname"/"$pkgver"
-
 make -j"$(nproc)"
-make -j"$(nproc)" check 
-make -j"$(nproc)" install
+
+mkdir -p /uny/pkg/"$pkgname"/"$pkgver"/{lib,include}
+
+cp bcrypt.h /uny/pkg/"$pkgname"/"$pkgver"/include
+cp bcrypt.a /uny/pkg/"$pkgname"/"$pkgver"/lib/libbcrypt.a
 
 ####################################################
 ### End of individual build script
